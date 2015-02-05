@@ -1,7 +1,43 @@
+/*
+ Machine Problem #1
+ Daniel Frazee & Edgardo Angel
+*/
+
+/*
+ Run & Compile
+ gcc main.c
+ ./a.out -b # -s #
+*/
+
 #include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
 #define KB *1024
-int main(int argc, char ** argv) 
+
+int main(int argc, char *argv[]) 
 {
+
+	int b, s, c;
+	char *bchar, *schar;
+	extern char *optarg;
+
+	while ((c = getopt(argc, argv, "b:s:")) != -1)
+		switch (c) {
+			case 'b':
+				bchar = optarg;
+				b = atoi(bchar);
+				break;
+			case 's':
+				schar = optarg;
+				s = atoi(schar);
+				break;
+		}
+		
+	printf("Block size: %d \n",b);
+	printf("Memory Size %d \n",s);
+
+ /*
 	int M = 1024;
 	int b = 128;
 	Init (M,b); // initialize
@@ -20,5 +56,7 @@ int main(int argc, char ** argv)
 	PrintList ();
 	// end test operations	
 	Destroy ();
-	
+	*/
+
+	return 0;
 }
