@@ -13,16 +13,14 @@ struct node {
 };
 
 void 	Init (int M, int b){
-    listHead = (struct node *) malloc(M);
-    //printf("Address: %u\n", listHead);
+    listHead = (struct node *) malloc(M*sizeof(*listHead));
     listHead->next = 0;
     node_length = b;
     number_of_nodes = M/b;
 } 
 
 void 	Destroy (){
-    //printf("Address: %u\n", listHead);
-    //free(listHead);                       //not working for some reason
+    free(listHead);
 } 	
 	 
 int 	Insert (int key, char * value_ptr, int value_len){
@@ -51,9 +49,6 @@ int 	Insert (int key, char * value_ptr, int value_len){
     conductor->length = value_len;
     memcpy((char *) conductor + 16, value_ptr, value_len);
     number_of_nodes--;
-    //printf("nodes: %d\n", number_of_nodes); 
-    //conductor->value_pointer = value_ptr;
-    //printf("\nkey = %d\n", conductor->k);
 }
 
 int 	Delete (int key){
