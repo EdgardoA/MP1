@@ -9,3 +9,4 @@ char* 	Lookup (int key);	 //	Looks up the first item with the given and returns 
 							//(the user can read or modify after obtaining the pointer)
 void 	PrintList ();		// prints the entire list by following the next pointers. Print the keys and the length	of the value
 #endif 
+
