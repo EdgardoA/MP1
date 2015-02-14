@@ -6,20 +6,7 @@
 /*
  Run & Compile
  gcc main.c
- ./a.out -b # -s #
- 
- 
- Haven't done a ton of testing but everything seems to be working. 
- If you want to check it out:
- 
-  gcc main.c
  ./a.out -b 128 -s 1408
- 
- That is essentially what they gave us. The output is a little 
- confusing so I will have to explain it. The only thing that I
- know of that isn't working is Destroy(). Hope this is working
- properly; it was much MUCH harder than expected haha. We will
- have to meet up soon and knock out some last minute bugs.
 */
 
 
@@ -33,7 +20,8 @@ int main(int argc, char ** argv)
 	int b, M, c;
 	char *bchar, *schar;
 	extern char *optarg;
-
+    
+    //takes the standard input and sets b and M
 	while ((c = getopt(argc, argv, "b:s:")) != -1)
 		switch (c) {
 			case 'b':
@@ -46,13 +34,8 @@ int main(int argc, char ** argv)
 				break;
 		}
 	
-    
-    
-    //int b = 128;
-	//int M = b * 11;  // so we have space for 11 items
-	
-	//char buf [1024];
-	//memset (buf, 1, 1024);		// set each byte to 1
+	char buf [1024];
+	memset (buf, 1, 1024);		// set each byte to 1
 	
 	char * msg = "a sample message";
 	
@@ -63,9 +46,9 @@ int main(int argc, char ** argv)
 	// some sample insertions
 	for (i=0; i< 10; i ++)
 	{
-		Insert (testnums [i], "test", 50);   // insert 50 bytes from the buffer as value for each of the insertions
+		Insert (testnums [i], buf, 50);   // insert 50 bytes from the buffer as value for each of the insertions
 	}
-	Insert (150, "test", 200); // this Insert should fail
+	Insert (150, buf, 200); // this Insert should fail
 	PrintList ();
 	Delete (7);
 	Insert (13, msg, strlen(msg)+1);		// insertion of strings, copies the null byte at the end
