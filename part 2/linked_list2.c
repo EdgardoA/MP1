@@ -8,7 +8,7 @@ int node_length;
 int number_of_nodes;
 int tiers, tier_size;
 int val = 2147483647; //2^31-1 signed values
-struct node *aop[16]; //array of pointers
+struct node** aop[16]; //array of pointers
 
 struct node {
     struct node *next;
@@ -36,7 +36,7 @@ void 	Init (int M, int b, int t){
 
     tiers = t;
     tier_size = val/t;
-    printf("Tier Size: %d\n",tier_size);
+    //printf("Tier Size: %d\n",tier_size);
 
 } 
 
@@ -45,9 +45,11 @@ void 	Destroy (){
     int i;
     for (i=0;i<tiers;i++)
     {
+        //aop[i]=NULL;
         //conductor = aop[i];
         free(aop[i]);
     }
+    //free(aop);
 
     printf("\nMemory Pool Empty\n");
 } 
@@ -89,7 +91,7 @@ int 	Insert (int key, char * value_ptr, int value_len){
     }
     
     if (number_of_nodes == 0) {
-        printf("List is full\n");
+        printf("List is full.\n");
         return 0;
     }
 
@@ -100,7 +102,7 @@ int 	Insert (int key, char * value_ptr, int value_len){
     }
     
     if(16 + value_len > node_length) {
-        printf("String too long for node\n");
+        printf("String too long for node.\n");
         return 0;
     } 
 
@@ -140,7 +142,7 @@ int 	Delete (int key){
             return 0;
         }
     }
-    printf("%d is not in the list.\n", key);
+    printf("\n*** \n Cannot delete %d. It's not in the list.\n***\n", key);
 }
 
 
@@ -178,15 +180,15 @@ void 	PrintList (){
 
         conductor = aop[i];
 
-        printf("Tier #: %d \n",i);
+        printf("Tier #%d... \n",(i+1));
         printf("Printed List: \n");
         while (conductor->next != 0) {
             conductor = conductor->next;
-            printf("Key = %d : ", conductor->k);
-            printf("Value Length = %d\n", conductor->length);
+            printf("Key = %d // ", conductor->k);
+            printf("Value Length = %d // ", conductor->length);
             printf("Message: \"%s\"\n\n", (char *) conductor + 16);
         }
-        printf("\n\n");
+        printf("\n");
 
     }
 

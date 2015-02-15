@@ -55,24 +55,62 @@ Insert (1610612745, "test", 50);
 
 //Creates 50 random numbers
 
-
+PrintList();
 
 
 		int i=0;
 		for (i=0; i< 10; i ++)
 		{
 			r = rand() % val ; //Random signed value
-			printf("Random number: %d\n",r);
+			//printf("Random number: %d\n",r);
 			Insert (r, "test", 50);
 		}
 
 		PrintList ();
 
-		printf("Test #1\n");
+	//All Functions Testing
 
-		Destroy();
+	// Inserting element
+	printf("\n*** \nInserting Element with Key: 1 \n***\n");
+	Insert (1, "test", 50);
 
-		PrintList ();
+	PrintList ();
+
+	// Looking for an existing element
+	printf("\n*** \nLooking for an existing element (Key: 1) \n***\n");
+	char* kv = Lookup (1);
+	if (kv) {
+		printf("\n*** \n Element Found \n*** \n");
+		printf ("\n Key = %d, Value Len = %d, Value = %s\n\n", *(int *) kv, *(int *) (kv+4), kv + 8);
+	} else {
+		printf("\n*** \n Element NOT Found \n*** \n");
+	}
+		
+
+	// Deleting existing element
+	printf("\n*** \nDeleting an existing element (Key: 1) \n***\n");
+	Delete (1);
+
+	PrintList ();
+
+	// Looking for non-existing element - this will fail and will not print anything
+	printf("\n*** \nLooking for a non existing element (Key: 5) \n***\n");
+	kv = Lookup (5);
+	if (kv) {
+		printf("\n*** \n Element Found \n*** \n");
+		printf ("\nKey = %d, Value Len = %d, Value = %s\n\n", *(int *) kv, *(int *) (kv+4), kv + 8);
+	} else {
+		printf("\n*** \n Element NOT Found \n*** \n");
+	}
+
+	// Deleting a non-existing element
+	printf("\n*** \nDeleting a non existing element (Key: 5) \n***\n");
+	Delete (5);
+
+	//Still to test
+
+	Destroy();
+	PrintList ();
 
 /*
 	int b = 128;
