@@ -69,8 +69,12 @@ int main(int argc, char ** argv)
 		printf ("Key = %d, Value Len = %d, Value = %s\n", *(int *) kv, *(int *) (kv+4), kv + 8);
 	
 	
-	// end test operations	
+	// end test operations
+    printf("Destroying List...\n");
 	Destroy ();
+    printf("List Destroyed!!...\n");
+    
+    PrintList();
     
 	
 }

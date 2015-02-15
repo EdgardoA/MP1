@@ -8,7 +8,7 @@ int node_length;
 int number_of_nodes;
 int tiers, tier_size;
 int val = 2147483647; //2^31-1 signed values
-struct node *aop[16]; //array of pointers
+struct node *aop[16];
 
 struct node {
     struct node *next;
@@ -41,14 +41,21 @@ void 	Init (int M, int b, int t){
 } 
 
 void 	Destroy (){
-    struct node *conductor;
     int i;
-    for (i=0;i<tiers;i++)
+    
+    for (i=0;i<16;i++)
     {
-        aop[i]=NULL;
+
+        printf("Before Delete Address = %u\n", aop[i]);
+
+        //aop[i]=NULL;
         //conductor = aop[i];
-        //free(aop[i]);
+        free(aop[i]);
+        //aop[i]=NULL;
+
+        printf("After Delete Address = %u\n", aop[i]);
     }
+    
     //free(aop);
 
     printf("\nMemory Pool Empty\n");
