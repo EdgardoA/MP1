@@ -8,4 +8,5 @@ int 	Delete (int key); 	 // delete the whole block containing that particular ke
 char* 	Lookup (int key);	 //	Looks up the first item with the given and returns a pointer to the value portion (the value length and the actual value) 
 							//(the user can read or modify after obtaining the pointer)
 void 	PrintList ();		// prints the entire list by following the next pointers. Print the keys and the length	of the value
+int 	getTier(int k);		//
 #endif 

@@ -2,9 +2,13 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#include <unistd.h>
+
+#include "linked_list2.h"
 
 /*
-ssh eangel@unix.cs.tamu.edu
+Mac Compile
+ssh username@unix.cs.tamu.edu
 */
 
 int main(int argc, char ** argv) 
@@ -36,10 +40,23 @@ int main(int argc, char ** argv)
 				break;
 		}
 
-		Init (M, b, t); // initialize
+		Init (M, b, t); // initialize tiers of memory pools
 
 		srand(time(NULL)); //Initialize random seed
-		
+
+/* Inserts at each interval on a 4 tier memory pool
+
+Insert (1, "test", 50);
+Insert (536870915, "test", 50);
+Insert (1073741830, "test", 50);
+Insert (1610612745, "test", 50);
+
+*/
+
+//Creates 50 random numbers
+
+
+
 
 		int i=0;
 		for (i=0; i< 10; i ++)
@@ -49,17 +66,13 @@ int main(int argc, char ** argv)
 			Insert (r, "test", 50);
 		}
 
+		PrintList ();
 
-		//PrintList ();
+		printf("Test #1\n");
 
+		Destroy();
 
-
-
-
-
-
-
-
+		PrintList ();
 
 /*
 	int b = 128;

@@ -1,12 +1,14 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "linked_list2.h"
 
 struct node *listHead;  //head pointer
 int node_length;
 int number_of_nodes;
 int tiers, tier_size;
-int Q; //Entire tiered memory size
 int val = 2147483647; //2^31-1 signed values
+struct node *aop[16]; //array of pointers
 
 struct node {
     struct node *next;
@@ -16,61 +18,81 @@ struct node {
 };
 
 void 	Init (int M, int b, int t){
-    Q = M*t;
-    listHead = (struct node *) malloc(Q*sizeof(*listHead));
-    listHead->next = 0;
-    node_length = b;
-    number_of_nodes = M/b;
-    tiers = t;
-    tier_size=val/tiers;
-    printf("Tier size: %d\n",tier_size);
-
-    struct node *aop[t]; //array of pointers
-    //Creating array of pointers, each pointing to the start of their tier
+    //Create t memory pools
     int i;
-    struct node *strnode;
-    strnode = listhead;
-    for (i=0; i<=t; i++)
+
+    struct node *temp; //temporary pointer to head of new tier memory pool
+    for (i=0;i<t;i++)
     {
-    	if (strnode == listhead){
-    		aop[t] = strnode;
-    	} else {
-    		//Move strnode # of nodes up to the start of the next tier
+        
+        temp = (struct node *) malloc(M*sizeof(*listHead));
+        aop[i] = temp;
+        temp=NULL;
 
-    	}
-
-    	/*
-
-		probably best to create # of instances of memory allocation
-		this will give the head pointer to each one of them.
-
-    	*/
-
-
-    	if (strnode != 0) {
-        	while (strnode->next != 0) {
-            	strnode = strnode->next;
-        	}
-    	}
     }
+
+    node_length = b;    //sets each node to b bytes
+    number_of_nodes = (M*t)/b; //total number of nodes
+
+    tiers = t;
+    tier_size = val/t;
+    printf("Tier Size: %d\n",tier_size);
+
 } 
 
 void 	Destroy (){
-    free(listHead);
-} 	
+    struct node *conductor;
+    int i;
+    for (i=0;i<tiers;i++)
+    {
+        //conductor = aop[i];
+        free(aop[i]);
+    }
+
+    printf("\nMemory Pool Empty\n");
+} 
+
+int getTier(int k){
+    
+    int t, thash = 0;
+
+    int lmin = 0;
+    int lmax = tier_size;
+
+    for (t=0;t<tiers;t++)
+    {
+       // printf("Lmin: %d \n",lmin);
+        //printf("Lmax: %d \n",lmax);
+
+        if (k>lmin && k<lmax){
+            thash=t;
+            return thash;
+        } else {
+            lmin = lmax;
+            lmax += tier_size;
+        }
+    }
+
+}
+
 	 
 int 	Insert (int key, char * value_ptr, int value_len){
     struct node *conductor;
-    conductor = listHead;
+
+    int i,t;
+    t = getTier(key);
+    for (i=0;i<tiers;i++){
+        if (i==t){
+            conductor = aop[i];
+        }
+
+    }
     
     if (number_of_nodes == 0) {
         printf("List is full\n");
         return 0;
     }
 
-    //Does this move to the next available node??
-    // If so,
-    // When inserting it will have to shift conductor up to the next tier
     if (conductor != 0) {
         while (conductor->next != 0) {
             conductor = conductor->next;
@@ -90,11 +112,22 @@ int 	Insert (int key, char * value_ptr, int value_len){
     conductor->length = value_len;
     memcpy((char *) conductor + 16, value_ptr, value_len);
     number_of_nodes--;
+
 }
 
 int 	Delete (int key){
     struct node *conductor;
-    conductor = listHead;
+    
+    int i,t;
+    t = getTier(key);
+
+    for (i=0;i<tiers;i++){
+        if (i==t){
+            conductor = aop[i];
+        }
+
+    }
+    
     if(conductor->k == key) {
         listHead = (char *) listHead + node_length;
         return 0;
@@ -110,9 +143,20 @@ int 	Delete (int key){
     printf("%d is not in the list.\n", key);
 }
 
+
 char* 	Lookup (int key){
     struct node *conductor;
-    conductor = listHead;
+
+    int i,t;
+    t = getTier(key);
+
+    for (i=0;i<tiers;i++){
+        if (i==t){
+            conductor = aop[i];
+        }
+
+    }
+
     if(conductor->k == key) {
         return (char *) conductor + 8;
     }
@@ -127,7 +171,26 @@ char* 	Lookup (int key){
 
 void 	PrintList (){
     struct node *conductor;
-    conductor = listHead;
+    
+    int i;
+
+    for (i=0;i<tiers;i++){
+
+        conductor = aop[i];
+
+        printf("Tier #: %d \n",i);
+        printf("Printed List: \n");
+        while (conductor->next != 0) {
+            conductor = conductor->next;
+            printf("Key = %d : ", conductor->k);
+            printf("Value Length = %d\n", conductor->length);
+            printf("Message: \"%s\"\n\n", (char *) conductor + 16);
+        }
+        printf("\n\n");
+
+    }
+
+/*
     printf("Printed List: \n");
     while (conductor->next != 0) {
             conductor = conductor->next;
@@ -136,12 +199,5 @@ void 	PrintList (){
             printf("Message: \"%s\"\n\n", (char *) conductor + 16);
     }
     printf("\n\n");
+    */
 }
-
-int tier_alloc(int key, int tiers) {
-
-
-
-	return 0;
-}
-
