@@ -8,7 +8,7 @@ int node_length;
 int number_of_nodes;
 int tiers, tier_size;
 int val = 2147483647; //2^31-1 signed values
-struct node** aop[16]; //array of pointers
+struct node *aop[16]; //array of pointers
 
 struct node {
     struct node *next;
@@ -45,9 +45,9 @@ void 	Destroy (){
     int i;
     for (i=0;i<tiers;i++)
     {
-        //aop[i]=NULL;
+        aop[i]=NULL;
         //conductor = aop[i];
-        free(aop[i]);
+        //free(aop[i]);
     }
     //free(aop);
 
