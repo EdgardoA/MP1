@@ -76,7 +76,7 @@ int 	Delete (int key){
             return 0;
         }
     }
-    printf("%d is not in the list.\n", key); //not found
+    printf("\n*** \n Cannot delete %d. It's not in the list.\n***\n", key); //Key is not found.
 }
 
 //traverses list for key
@@ -102,10 +102,11 @@ void 	PrintList (){
     printf("Printed List: \n");
     while (conductor->next != 0) {
             conductor = conductor->next;
-            printf("Key = %d : ", conductor->k);
-            printf("Value Length = %d\n", conductor->length);
+            printf("Key = %d // ", conductor->k);
+            printf("Value Length = %d //", conductor->length);
+            printf("Message: \"%s\"\n\n", (char *) conductor + 16);
     }
-    printf("\n\n");
+    printf("\n");
 }
 
 

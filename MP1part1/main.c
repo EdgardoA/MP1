@@ -1,14 +1,13 @@
 /*
- Machine Problem #1
+ Machine Problem #1 - Part 1
  Daniel Frazee & Edgardo Angel
 */
 
 /*
  Run & Compile
- gcc main.c
+ gcc *.c
  ./a.out -b 128 -s 1408
 */
-
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -62,19 +61,13 @@ int main(int argc, char ** argv)
 	if (kv)
 		printf ("Key = %d, Value Len = %d\n", *(int *) kv, *(int *) (kv+4));
 	
-	
 	// this look up  should succeed and print the string "a sample message"
 	kv = Lookup (13);
 	if (kv)
 		printf ("Key = %d, Value Len = %d, Value = %s\n", *(int *) kv, *(int *) (kv+4), kv + 8);
 	
-	
 	// end test operations
-    printf("Destroying List...\n");
+	printf("\n*** \nMemory Pool Destroyed\n***\n");
 	Destroy ();
-    printf("List Destroyed!!...\n");
     
-    PrintList();
-    
-	
 }
