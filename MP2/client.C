@@ -1,6 +1,8 @@
 /* 
     File: client.C
 
+    Author: Daniel Frazee & Edgardo Angel
+
     Date  : 02/20/15
 
     Run & Compile:
@@ -43,15 +45,17 @@ string int2string(int number) {
 
 int main(int argc, char * argv[]) {
 
-  struct timeval req_str_single, req_end_single; //To measure a single request through the server
-  struct timeval rep_str_single, rep_end_single; //To measure a single request through a function that return a reply
+  struct timeval req_str_single, req_end_single; // To measure a single request through the server
+  struct timeval rep_str_single, rep_end_single; // To measure a single request through a function that return a reply
 
-  struct timeval req_str_mult, req_end_mult; //To measure a multiple request through the server
-  struct timeval rep_str_mult, rep_end_mult; //To measure a multiple request through a function that return a reply
+  struct timeval req_str_mult, req_end_mult; // To measure a multiple request through the server
+  struct timeval rep_str_mult, rep_end_mult; // To measure a multiple request through a function that return a reply
 
-  struct timeval str_time, end_time; //To measure timing for the entire program
+  struct timeval str_time, end_time; // To measure timing for the entire program
 
-  long timedif_ReqS, timedif_RepS, timedif_ReqM, timedif_RepM, timedif_total; //To measure difference between readings
+  long timedif_ReqS, timedif_RepS, timedif_ReqM, timedif_RepM, timedif_total; // To measure difference between readings
+
+  gettimeofday(&str_time,NULL); // Start timing the entire program
 
   cout << "CLIENT STARTED:" << endl;
 
@@ -68,8 +72,6 @@ int main(int argc, char * argv[]) {
   cout << "Establishing control channel... " << flush;
   RequestChannel chan("control", RequestChannel::CLIENT_SIDE);
   cout << "done." << endl;
-
-  gettimeofday(&str_time,NULL);
 
   //Single Request through Server
 
@@ -107,20 +109,28 @@ int main(int argc, char * argv[]) {
   string reply4 = chan.send_request("quit");
   cout << "Reply to request 'quit' is '" << reply4 << endl;
 
-  gettimeofday(&end_time,NULL);
+  gettimeofday(&end_time,NULL); // End timing the entire program
 
-  timedif_ReqS = 1000000L * (req_end_single.tv_sec - req_str_single.tv_sec) + (req_end_single.tv_usec - req_str_single.tv_usec);
-  timedif_RepS = 1000000L * (rep_end_single.tv_sec - rep_str_single.tv_sec) + (rep_end_single.tv_usec - rep_str_single.tv_usec);
-  timedif_ReqM = 1000000L * (req_end_mult.tv_sec - req_str_mult.tv_sec) + (req_end_mult.tv_usec - req_str_mult.tv_usec);
-  timedif_RepM = 1000000L * (rep_end_mult.tv_sec - rep_str_mult.tv_sec) + (rep_end_mult.tv_usec - rep_str_mult.tv_usec);
+  //timedif_ReqS = 1000000L * (req_end_single.tv_sec - req_str_single.tv_sec) + (req_end_single.tv_usec - req_str_single.tv_usec);
+  timedif_ReqS = (req_end_single.tv_usec - req_str_single.tv_usec);
+  
+  //timedif_RepS = 1000000L * (rep_end_single.tv_sec - rep_str_single.tv_sec) + (rep_end_single.tv_usec - rep_str_single.tv_usec);
+  timedif_RepS = (rep_end_single.tv_usec - rep_str_single.tv_usec);
 
-  timedif_total = 1000000L * (end_time.tv_sec - str_time.tv_sec) + (end_time.tv_usec - str_time.tv_usec);
+  //timedif_ReqM = 1000000L * (req_end_mult.tv_sec - req_str_mult.tv_sec) + (req_end_mult.tv_usec - req_str_mult.tv_usec);
+  timedif_ReqM = (req_end_mult.tv_usec - req_str_mult.tv_usec);
+
+  //timedif_RepM = 1000000L * (rep_end_mult.tv_sec - rep_str_mult.tv_sec) + (rep_end_mult.tv_usec - rep_str_mult.tv_usec);
+  timedif_RepM = (rep_end_mult.tv_usec - rep_str_mult.tv_usec);
+
+  //timedif_total = 1000000L * (end_time.tv_sec - str_time.tv_sec) + (end_time.tv_usec - str_time.tv_usec);
+  timedif_total = (end_time.tv_usec - str_time.tv_usec);
 
   printf("Timings...\n");
-  printf("Total time for SINGLE request through SERVER: %ld musec.\n",timedif_ReqS);
-  printf("Total time for SINGLE request through FUNCTION: %ld musec.\n",timedif_RepS);
-  printf("Total time for MULTIPLE request through SERVER: %ld musec.\n",timedif_ReqM);
-  printf("Total time for MULTIPLE request through FUNCTION: %ld musec.\n",timedif_RepM);
+  printf("Total time for SINGLE request through SERVER: %ld microseconds.\n",timedif_ReqS);
+  printf("Total time for SINGLE request through FUNCTION: %ld microseconds.\n",timedif_RepS);
+  printf("Total time for MULTIPLE request through SERVER: %ld microseconds.\n",timedif_ReqM);
+  printf("Total time for MULTIPLE request through FUNCTION: %ld microseconds.\n",timedif_RepM);
   printf("Total time of program: %ld musec. \n",timedif_total);
 
   usleep(1000000);
