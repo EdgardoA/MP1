@@ -111,25 +111,25 @@ int main(int argc, char * argv[]) {
 
   gettimeofday(&end_time,NULL); // End timing the entire program
 
-  //timedif_ReqS = 1000000L * (req_end_single.tv_sec - req_str_single.tv_sec) + (req_end_single.tv_usec - req_str_single.tv_usec);
+  //Calculates time for SINGLE request through SERVER
   timedif_ReqS = (req_end_single.tv_usec - req_str_single.tv_usec);
   
-  //timedif_RepS = 1000000L * (rep_end_single.tv_sec - rep_str_single.tv_sec) + (rep_end_single.tv_usec - rep_str_single.tv_usec);
+  //Calculates time for SINGLE request through FUNCTION
   timedif_RepS = (rep_end_single.tv_usec - rep_str_single.tv_usec);
-
-  //timedif_ReqM = 1000000L * (req_end_mult.tv_sec - req_str_mult.tv_sec) + (req_end_mult.tv_usec - req_str_mult.tv_usec);
+  
+  //Calculates time for MULTIPLE request through SERVER (100 iterations)
   timedif_ReqM = (req_end_mult.tv_usec - req_str_mult.tv_usec);
-
-  //timedif_RepM = 1000000L * (rep_end_mult.tv_sec - rep_str_mult.tv_sec) + (rep_end_mult.tv_usec - rep_str_mult.tv_usec);
+  
+  //Calculates time for MULTIPLE request through FUNCTION (100 iterations)
   timedif_RepM = (rep_end_mult.tv_usec - rep_str_mult.tv_usec);
 
-  //timedif_total = 1000000L * (end_time.tv_sec - str_time.tv_sec) + (end_time.tv_usec - str_time.tv_usec);
+  //Calculates time for total time of program
   timedif_total = (end_time.tv_usec - str_time.tv_usec);
 
   printf("Timings...\n");
-  printf("Total time for SINGLE request through SERVER: %ld microseconds.\n",timedif_ReqS);
+  printf("Total time for SINGLE request through LOCALLY: %ld microseconds.\n",timedif_ReqS);
   printf("Total time for SINGLE request through FUNCTION: %ld microseconds.\n",timedif_RepS);
-  printf("Total time for MULTIPLE request through SERVER: %ld microseconds.\n",timedif_ReqM);
+  printf("Total time for MULTIPLE request through LOCALLY: %ld microseconds.\n",timedif_ReqM);
   printf("Total time for MULTIPLE request through FUNCTION: %ld microseconds.\n",timedif_RepM);
   printf("Total time of program: %ld musec. \n",timedif_total);
 
