@@ -128,7 +128,7 @@ extern Addr my_malloc(unsigned int _length) {
             printf("List is full\n");
             break;
         }
-        //printf("key = %d", new_block->block_size);
+        //printf("block size = %d\n", new_block->block_size);
         new_block = new_block->next;
         //printf("test2");
     }
@@ -137,6 +137,7 @@ extern Addr my_malloc(unsigned int _length) {
                 
         if (new_block->block_size == pow(2, temp) && new_block->free_byte == 0) {
             new_block->free_byte = 1;
+            //printf("block size = %d\n", new_block->block_size);
             return (char *) new_block + 20; 
         }
     
@@ -161,7 +162,7 @@ extern Addr my_malloc(unsigned int _length) {
     }
     
   
-  return malloc((size_t)_length);
+  //return malloc((size_t)_length);
 }
 
 extern int my_free(Addr _a) {
@@ -185,29 +186,59 @@ extern int my_free(Addr _a) {
   
   temp_block = temp_address2;
   
+  //printf("Test");
   while ((temp_block->free_byte) == 0 && temp_block->block_size == free_block->block_size) {
     if (free_block->next == temp_address2) {
+        free_block->block_size = (free_block->block_size) * 2;
+    
+        if (temp_block->next == 0) {
+            free_block->next = 0;
+            temp_address1 = free_block;
+            temp_address2 = temp_address1 ^ (1 << (int)floor (log2(free_block->block_size)));
+        } else {
+            free_block->next = (char *) free_block + free_block->block_size;
+            temp_address1 = free_block;
+            temp_address2 = temp_address1 ^ (1 << (int)floor (log2(free_block->block_size)));
+        }
+        
+        free_block->free_byte = 0;
+    } else if (temp_address2 < temp_address1) {
+        temp_block = temp_address1;
+        free_block = temp_address2;
+        
+        if (free_block->next == temp_address1) {
         free_block->block_size = (free_block->block_size) * 2;
         
         if (temp_block->next == 0) {
             free_block->next = 0;
+            temp_address1 = free_block;
+            temp_address2 = temp_address1 ^ (1 << (int)floor (log2(free_block->block_size)));
         } else {
             free_block->next = (char *) free_block + free_block->block_size;
+            temp_address1 = free_block;
+            temp_address2 = temp_address1 ^ (1 << (int)floor (log2(free_block->block_size)));
         }
-        temp_address2 = free_block->next;
+        }
         free_block->free_byte = 0;
     } else {
-        free_block = temp_address2;
-        free_block->block_size = (free_block->block_size) * 2;
-        if (temp_block->next == 0) {
-            free_block->next = 0;
+        if (free_block->next == 0) {
+            temp_block->next = 0;
         } else {
             free_block->next = (char *) free_block + free_block->block_size;
         }
-        temp_address2 = free_block->next;
+        free_block = temp_address2;
+        free_block->block_size = (free_block->block_size) * 2;
+        if (free_block->next == 0) {
+            temp_address1 = free_block;
+            temp_address2 = temp_address1 ^ (1 << (int)floor (log2(free_block->block_size)));
+        } else {
+            temp_address1 = free_block;
+            temp_address2 = temp_address1 ^ (1 << (int)floor (log2(free_block->block_size)));
+        }
         free_block->free_byte = 0;
     }
     temp_block = temp_address2;
+    temp_address1 = free_block;
   }
   
   free_block->free_byte = 0;
@@ -215,33 +246,3 @@ extern int my_free(Addr _a) {
   //free(_a);
   return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
