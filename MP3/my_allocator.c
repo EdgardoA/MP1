@@ -93,9 +93,6 @@ unsigned int init_allocator(unsigned int _basic_block_size,
     address->block_size = pow(2, temp);
     list_size = pow(2, temp);
     return address;
-    
-    
-
 }
 
 int release_allocator() {
