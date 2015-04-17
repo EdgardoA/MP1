@@ -29,6 +29,8 @@
 #include <unistd.h>
 
 #include "reqchannel.H"
+#include "semaphore.h"
+#include "boundedbuffer.h"
 
 using namespace std;
 
@@ -50,12 +52,41 @@ using namespace std;
 
     /* -- (none) -- */
 
+// GLOBALS
+
+int requests;
+int bbsize;
+int channels;
+
 /*--------------------------------------------------------------------------*/
 /* MAIN FUNCTION */
 /*--------------------------------------------------------------------------*/
 
 int main(int argc, char * argv[]) {
 
+<<<<<<< Updated upstream
+=======
+    // get command line arguments
+  int c, n, b, w;
+   
+    while((c = getopt(argc, argv, "n:b:w:")) != -1) {
+        switch(c) {
+        case 'n':
+          requests = atoi(optarg);
+          break;
+        case 'b':
+          bbsize = atoi(optarg);
+          break;
+        case 'w':
+          channels = atoi(optarg);
+          break;
+        case '?':
+          break;
+        default:
+          exit(0);
+      }
+    } 
+>>>>>>> Stashed changes
 
 
   cout << "CLIENT STARTED:" << endl;
