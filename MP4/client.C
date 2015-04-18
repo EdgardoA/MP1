@@ -28,35 +28,25 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include <sys/time.h>
+
 #include "reqchannel.H"
 #include "semaphore.h"
 #include "boundedbuffer.h"
 
 using namespace std;
 
-/*--------------------------------------------------------------------------*/
-/* DATA STRUCTURES */ 
-/*--------------------------------------------------------------------------*/
+// GLOBALS VARIABLES -------------------------------------------------------*
 
-    /* -- (none) -- */
+RequestChannel* CHAN_CONTROL;
 
-/*--------------------------------------------------------------------------*/
-/* CONSTANTS */
-/*--------------------------------------------------------------------------*/
+int n_requests;
+int b_size;
+int w_threads;
 
-    /* -- (none) -- */
-
-/*--------------------------------------------------------------------------*/
-/* FORWARDS */
-/*--------------------------------------------------------------------------*/
-
-    /* -- (none) -- */
-
-// GLOBALS
-
-int requests;
-int bbsize;
-int channels;
+pthread_t joe_t;
+pthread_t jane_t;
+pthread_t john_t;
 
 /*--------------------------------------------------------------------------*/
 /* MAIN FUNCTION */
@@ -64,21 +54,20 @@ int channels;
 
 int main(int argc, char * argv[]) {
 
-<<<<<<< Updated upstream
-=======
-    // get command line arguments
+
+  // Command Line
   int c, n, b, w;
    
     while((c = getopt(argc, argv, "n:b:w:")) != -1) {
         switch(c) {
         case 'n':
-          requests = atoi(optarg);
+          n_requests = atoi(optarg);
           break;
         case 'b':
-          bbsize = atoi(optarg);
+          b_size = atoi(optarg);
           break;
         case 'w':
-          channels = atoi(optarg);
+          w_threads = atoi(optarg);
           break;
         case '?':
           break;
@@ -86,17 +75,47 @@ int main(int argc, char * argv[]) {
           exit(0);
       }
     } 
->>>>>>> Stashed changes
 
 
   cout << "CLIENT STARTED:" << endl;
 
+  cout<<"\nData Requests per Person: " << n_requests << "\nSize of Buffer: " << b_size << "\nWorker Threads: " << w_threads ;
+
+  cout << "\nCreating Data Server Process" << endl;
+  pid_t child_pid = fork();
+
+  // Child creates Data Server
+  if (child_pid == 0) {
+    execl("dataserver",  0);
+  } 
+  // Parent
+  else {
+
+    //Create Bounded Buffers
+
+    //Request Buffer
+    //Response Buffer
+
+    cout << "\nConnect to Data Server" << endl;
+    CHAN_CONTROL = new RequestChannel("control", RequestChannel::CLIENT_SIDE);
+    string REPLY = CHAN_CONTROL->send_request("hello");
+    cout << "\nSERVER: " << REPLY << endl;
+
+
+
+
+  }
+
+/*
   cout << "Establishing control channel... " << flush;
   RequestChannel chan("control", RequestChannel::CLIENT_SIDE);
   cout << "done." << endl;;
 
+*/
+
   /* -- Start sending a sequence of requests */
 
+/*
   string reply1 = chan.send_request("hello");
   cout << "Reply to request 'hello' is '" << reply1 << "'" << endl;
 
@@ -118,6 +137,8 @@ int main(int argc, char * argv[]) {
 
   string reply4 = chan.send_request("quit");
   cout << "Reply to request 'quit' is '" << reply4 << "'" << endl;
+
+*/
 
   usleep(1000000);
 }
