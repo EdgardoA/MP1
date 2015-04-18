@@ -44,9 +44,16 @@ int n_requests;
 int b_size;
 int w_threads;
 
-pthread_t joe_t;
-pthread_t jane_t;
-pthread_t john_t;
+pthread_t joeThread;
+pthread_t janeThread;
+pthread_t johnThread;
+
+boundedbuffer reqBuffer;
+boundedbuffer resBuffer;
+
+const int NUM_PERSONS = 3;
+const string PERSONS[NUM_PERSONS] = { "Joe Smith", "Jane Smith", "John Doe" };
+const int STATISTICS_SIZE = 100;
 
 /*--------------------------------------------------------------------------*/
 /* MAIN FUNCTION */
@@ -92,14 +99,28 @@ int main(int argc, char * argv[]) {
   else {
 
     //Create Bounded Buffers
+    cout << "Creating Bounded Buffers" << endl;
 
     //Request Buffer
+    reqBuffer = boundedbuffer(b_size);
     //Response Buffer
+    resBuffer = boundedbuffer(b_size);
 
     cout << "\nConnect to Data Server" << endl;
     CHAN_CONTROL = new RequestChannel("control", RequestChannel::CLIENT_SIDE);
     string REPLY = CHAN_CONTROL->send_request("hello");
     cout << "\nSERVER: " << REPLY << endl;
+
+    cout << "\nCreating Request Threads" << endl;
+
+    void* joe = new int(0);
+    pthread_create(&joeThread, NULL, reqThreadRoutine, joe);
+  
+    void* jane = new int(1);
+    pthread_create(&janeThread, NULL, reqThreadRoutine, jane);
+
+    void* john = new int(2);
+    pthread_create(&johnThread, NULL, reqThreadRoutine, john);
 
 
 
@@ -141,4 +162,23 @@ int main(int argc, char * argv[]) {
 */
 
   usleep(1000000);
+}
+
+//Thread Functions
+
+void* reqThreadRoutine(void* _person) {
+  
+  int person = *(int*)_person;
+  
+  for (int i = 0; i < n_requests; i ++) {
+    Item* item = new Item;
+    item->id = person;
+    item->data = "data " + PERSONS[person];
+    //cout << endl << "\t* * Request thread is depositing " << PERSONS[person] << "'s item in bb" << endl;
+    //cout << "\t* * i = " << i << endl;
+    bb.depositItem(item);
+  }
+  
+  delete (int*)_person;
+  pthread_exit(NULL);
 }
