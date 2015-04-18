@@ -25,14 +25,19 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <stdio.h>
+
 #include <errno.h>
+
 #include <unistd.h>
+#include <stdlib.h>
 
 #include <sys/time.h>
 
+#include "item.H"
 #include "reqchannel.H"
-#include "semaphore.h"
-#include "boundedbuffer.h"
+#include "semaphore.H"
+#include "boundedbuffer.H"
 
 using namespace std;
 
@@ -48,12 +53,14 @@ pthread_t joeThread;
 pthread_t janeThread;
 pthread_t johnThread;
 
-boundedbuffer reqBuffer;
-boundedbuffer resBuffer;
+Boundedbuffer reqBuffer;
+Boundedbuffer resBuffer;
 
 const int NUM_PERSONS = 3;
 const string PERSONS[NUM_PERSONS] = { "Joe Smith", "Jane Smith", "John Doe" };
 const int STATISTICS_SIZE = 100;
+
+void* reqThreadRoutine(void* _person);
 
 /*--------------------------------------------------------------------------*/
 /* MAIN FUNCTION */
@@ -102,9 +109,9 @@ int main(int argc, char * argv[]) {
     cout << "Creating Bounded Buffers" << endl;
 
     //Request Buffer
-    reqBuffer = boundedbuffer(b_size);
+    reqBuffer = Boundedbuffer(b_size);
     //Response Buffer
-    resBuffer = boundedbuffer(b_size);
+    resBuffer = Boundedbuffer(b_size);
 
     cout << "\nConnect to Data Server" << endl;
     CHAN_CONTROL = new RequestChannel("control", RequestChannel::CLIENT_SIDE);
@@ -176,7 +183,7 @@ void* reqThreadRoutine(void* _person) {
     item->data = "data " + PERSONS[person];
     //cout << endl << "\t* * Request thread is depositing " << PERSONS[person] << "'s item in bb" << endl;
     //cout << "\t* * i = " << i << endl;
-    bb.depositItem(item);
+    reqBuffer.depositItem(item);
   }
   
   delete (int*)_person;
