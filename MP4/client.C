@@ -1,41 +1,28 @@
 /* 
-    File: simpleclient.C
+ 
+ MP4 - Dealing with a Reluctant Data Server
 
-    Author: R. Bettati
-            Department of Computer Science
-            Texas A&M University
-    Date  : 2013/01/31
+ Daniel Frazee & Edgardo Angel
 
-    Simple client main program for MP3 in CSCE 313
 */
 
-/*--------------------------------------------------------------------------*/
-/* DEFINES */
-/*--------------------------------------------------------------------------*/
-
-    /* -- (none) -- */
-
-/*--------------------------------------------------------------------------*/
-/* INCLUDES */
-/*--------------------------------------------------------------------------*/
+/* INCLUDES -----------------------------------------------------------------*/
 
 #include <cassert>
 #include <cstring>
 #include <iostream>
+#include <cstdlib>
+
 #include <sys/types.h>
 #include <sys/stat.h>
-
-#include <stdio.h>
-
-#include <errno.h>
-
-#include <unistd.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <cstdlib>
 #include <sys/time.h>
 #include <sys/select.h>
 
+#include <stdio.h>
+#include <errno.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <pthread.h>
 
 #include "item.H"
 #include "reqchannel.H"
@@ -44,9 +31,7 @@
 
 using namespace std;
 
-// GLOBALS VARIABLES -------------------------------------------------------*
-
-//RequestChannel* CHAN_CONTROL;
+// GLOBALS VARIABLES -------------------------------------------------------*/
 
 int n_requests;
 int b_size;
@@ -59,13 +44,17 @@ pthread_t johnThread;
 Boundedbuffer reqBuffer;
 Boundedbuffer resBuffer;
 
+// file descriptors
+int * reader;
+int * writer;
+int * ids;
+
 const int NUM_PERSONS = 3;
 const string PERSONS[NUM_PERSONS] = { "Joe Smith", "Jane Smith", "John Doe" };
 const int STATISTICS_SIZE = 100;
 
 
-
-//Thread Functions
+// Thread Functions ---------------------------------------------------------*/
 
 void* reqThreadRoutine(void* _person) {
   
@@ -75,22 +64,22 @@ void* reqThreadRoutine(void* _person) {
     Item* item = new Item;
     item->id = person;
     item->data = "data " + PERSONS[person];
+    //item->Id = person;
+    //item->info = "Info " + PERSONS[person];
     cout << endl << "\t* * Request thread is depositing " << PERSONS[person] << "'s item in bb" << endl;
     cout << "\t* * i = " << i << endl;
-    reqBuffer.depositItem(item);
+    
+reqBuffer.depositItem(item);
+    //reqBuffer.putItem(item);
   }
   
   delete (int*)_person;
   pthread_exit(NULL);
 }
 
-
-/*--------------------------------------------------------------------------*/
-/* MAIN FUNCTION */
-/*--------------------------------------------------------------------------*/
+// MAIN FUNCTION -----------------------------------------------------------*/
 
 int main(int argc, char * argv[]) {
-
 
   // Command Line
   int c, n, b, w;
@@ -120,6 +109,11 @@ int main(int argc, char * argv[]) {
 
   cout << "\nCreating Data Server Process" << endl;
   pid_t child_pid = fork();
+
+    // set arrays
+  reader =  new int[w_threads];
+  writer =  new int[w_threads];
+  ids =   new int[w_threads];
 
   // Child creates Data Server
   if (child_pid == 0) {
@@ -153,6 +147,19 @@ int main(int argc, char * argv[]) {
 
     void* john = new int(2);
     pthread_create(&johnThread, NULL, reqThreadRoutine, john);
+
+    cout << "Creating Request Channels" << endl;
+    for (int i = 0; i < w_threads; i ++) {
+      string channel_name = chan.send_request("newthread");
+      RequestChannel * channel = new RequestChannel(channel_name, RequestChannel::CLIENT_SIDE);
+      
+      reader[i] = channel->read_fd();
+      writer[i] = channel->write_fd();
+    }
+
+    cout << "Closing..." << endl;
+    REPLY = chan.send_request("quit");
+    cout << "\tSERVER: " << REPLY << endl;
 
   }
 
