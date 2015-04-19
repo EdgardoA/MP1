@@ -62,15 +62,12 @@ void* reqThreadRoutine(void* _person) {
   
   for (int i = 0; i < n_requests; i ++) {
     Item* item = new Item;
-    item->id = person;
-    item->data = "data " + PERSONS[person];
-    //item->Id = person;
-    //item->info = "Info " + PERSONS[person];
+    item->Id = person;
+    item->info = "Info " + PERSONS[person];
     cout << endl << "\t* * Request thread is depositing " << PERSONS[person] << "'s item in bb" << endl;
     cout << "\t* * i = " << i << endl;
     
-reqBuffer.depositItem(item);
-    //reqBuffer.putItem(item);
+    reqBuffer.putItem(item);
   }
   
   delete (int*)_person;
