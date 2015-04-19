@@ -38,14 +38,3 @@ void Boundedbuffer::putItem(Item* _item) {
 	Lock->V();
 	Full->V();
 }
-
-void Boundedbuffer::print() {
-    queue<Item*> que2 = que;
-    cout << "Bounded Buffer: ";
-    
-    while(que2.empty() == false) {
-        cout << que2.front()->Id;
-        cout << " " << que2.front()->info << "\n";
-        que2.pop();
-    }
-}

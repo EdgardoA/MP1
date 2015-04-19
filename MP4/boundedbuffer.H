@@ -29,8 +29,6 @@ public:
 	Item* getItem();
     
     ~Boundedbuffer() {}
-    
-    void print();
 
 };
 

@@ -152,10 +152,10 @@ void handle_process_loop(RequestChannel & _channel) {
 
   for(;;) {
 
-    cout << "Reading next request from channel (" << _channel.name() << ") ..." << flush;
+    //cout << "Reading next request from channel (" << _channel.name() << ") ..." << flush;
     string request = _channel.cread();
-    cout << " done (" << _channel.name() << ")." << endl;
-    cout << "New request is " << request << endl;
+    //cout << " done (" << _channel.name() << ")." << endl;
+    //cout << "New request is " << request << endl;
 
     if (request.compare("quit") == 0) {
       _channel.cwrite("bye");

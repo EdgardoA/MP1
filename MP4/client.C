@@ -12,6 +12,7 @@
 #include <cstring>
 #include <iostream>
 #include <cstdlib>
+#include <cmath>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -41,8 +42,19 @@ pthread_t joeThread;
 pthread_t janeThread;
 pthread_t johnThread;
 
+pthread_t joeStat;
+pthread_t janeStat;
+pthread_t johnStat;
+
+pthread_t workerThread;
+
 Boundedbuffer reqBuffer;
 Boundedbuffer resBuffer;
+
+const int MESSAGE_SIZE = 255;
+char READ_BUFFER[MESSAGE_SIZE];
+
+const int MAX_CHANNELS = 155;
 
 // file descriptors
 int * reader;
@@ -52,6 +64,57 @@ int * ids;
 const int NUM_PERSONS = 3;
 const string PERSONS[NUM_PERSONS] = { "Joe Smith", "Jane Smith", "John Doe" };
 const int STATISTICS_SIZE = 100;
+
+long stats[NUM_PERSONS][STATISTICS_SIZE] = {0}; // initialize to zero
+
+// Other Functions ---------------------------------------------------------*/
+
+void write_initial_items() {
+  for (int i = 0; i < w_threads; i ++) {
+    Item* item;
+    item = reqBuffer.getItem();
+    
+    string data = item->info;
+    ids[i] = item->Id;
+    
+    write(writer[i], data.c_str(), strlen(data.c_str())+1);
+  }
+}
+
+void printHorizontal(int l) {
+  for (int j = 0; j < l; j ++) cout << "-";
+  cout << endl;
+}
+
+void printStatistics() {
+  cout << endl << endl;
+  
+  for (int i = 0; i < NUM_PERSONS; i ++) {
+    int seg_total = 0;
+    
+    string header = "Statistics for " + PERSONS[i];
+    printHorizontal(header.length());
+    cout << header << endl;
+    printHorizontal(header.length());
+    
+    for (int j = 0; j <= STATISTICS_SIZE; j ++) {
+      if (j % 10 == 0 && j != 0) {
+        cout << j - 10 << " - " << j - 1 << "\t\t" << seg_total << " times\t" << endl;
+        
+        seg_total = 0;
+      } else {
+        if (j != 100)
+          seg_total += stats[i][j];
+      }
+    }
+    printHorizontal(header.length());
+    cout << "Total requests: " << n_requests << endl;
+    printHorizontal(header.length());
+    cout << endl;
+  }     
+}
+
+
 
 
 // Thread Functions ---------------------------------------------------------*/
@@ -64,13 +127,90 @@ void* reqThreadRoutine(void* _person) {
     Item* item = new Item;
     item->Id = person;
     item->info = "Info " + PERSONS[person];
-    cout << endl << "\t* * Request thread is depositing " << PERSONS[person] << "'s item in bb" << endl;
-    cout << "\t* * i = " << i << endl;
+    //cout << endl << "\t* * Request thread is depositing " << PERSONS[person] << "'s item in bb" << endl;
+    //cout << "\t* * i = " << i << endl;
     
     reqBuffer.putItem(item);
   }
   
   delete (int*)_person;
+  pthread_exit(NULL);
+}
+
+void* workerThreadRoutine(void* _nothing) {
+  write_initial_items(); // write the initial items
+  
+  bool done = false;
+  
+  while(!done) {
+    fd_set read_set;
+    
+    // zero em out
+    FD_ZERO(&read_set);
+    
+    // set initially
+    for (int i = 0; i < w_threads; i++) {
+      FD_SET(reader[i], &read_set);
+    }
+    
+    int ready = select(w_threads, &read_set, NULL, NULL, NULL);
+    
+    if (ready == -1) {
+      cout << "Error calling select.";
+      exit(1);
+    }
+    
+    else {
+      for (int i = 0; i < w_threads; i ++) {
+        // if isset
+        if(FD_ISSET(reader[i], &read_set)) {
+          Item * item_r;
+          read(reader[i], READ_BUFFER, MESSAGE_SIZE); // read the response
+          
+          string reply = READ_BUFFER;
+          item_r = new Item(ids[i], reply, 0);
+          
+          resBuffer.putItem(item_r); // deposit that item in the statistics buffer
+          
+          if (!reqBuffer.empty()) {
+            Item * item_w;
+            
+            item_w = reqBuffer.getItem();
+            ids[i] = item_w->Id;
+            string data = item_w->info;
+            
+            write(writer[i], data.c_str(), strlen(data.c_str())+1); // send the next item to the server now a spots opened up
+          } else {
+            usleep(10000); // make sure we're finished
+            done = true;
+          }
+        }
+      }
+    }
+    
+    
+  }
+  
+  pthread_exit(NULL);
+}
+
+void* statRoutine(void* nothing) {
+  while (!reqBuffer.empty()) {
+    while (!resBuffer.empty()) {
+      Item* sta_item = resBuffer.getItem();
+      
+      int id = sta_item->Id;
+      int value = atoi(sta_item->info.c_str());
+      if (value < STATISTICS_SIZE - 1) {
+        stats[id][value] += 1;
+      } else {
+        // max statistics exceeded
+      }
+    
+      delete sta_item; // finally clean up this item
+    }
+  }
+  
   pthread_exit(NULL);
 }
 
@@ -153,6 +293,19 @@ int main(int argc, char * argv[]) {
       reader[i] = channel->read_fd();
       writer[i] = channel->write_fd();
     }
+
+    cout << "Creating Worker Threads" << endl;
+    pthread_create(&workerThread, NULL, workerThreadRoutine, NULL);
+
+    cout << "Creating Statistic Threads" << endl;
+    pthread_create(&joeStat, NULL, statRoutine, NULL);
+    pthread_create(&janeStat, NULL, statRoutine, NULL);
+    pthread_create(&johnStat, NULL, statRoutine, NULL);
+    
+    cout << "Creating Histogram" << endl;
+    pthread_join(workerThread, NULL);
+    
+    printStatistics();
 
     cout << "Closing..." << endl;
     REPLY = chan.send_request("quit");
