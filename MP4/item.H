@@ -1,6 +1,9 @@
 #ifndef _item_H_
 #define _item_H_
 
+#include <iostream>
+
+
 using namespace std;
 
 class Item {
@@ -11,7 +14,9 @@ public:
 	Item(): id(-1), data("") { }
 	Item(int _id, string _data_string, int _req_num): id(_id), data(_data_string) { }
 	
-	virtual void Print();
+	virtual void Print() {
+		cout << "[" << id << "]:[" << data << "]";
+    }
 	
 	~Item() { }
 };

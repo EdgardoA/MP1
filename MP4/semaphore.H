@@ -44,9 +44,12 @@ private:
   /* -- INTERNAL DATA STRUCTURES
      You may need to change them to fit your implementation. */
 
-  int             value;
+  int value;
   pthread_mutex_t m;
   pthread_cond_t  c;
+  
+  void Lock() { pthread_mutex_lock(&m); }
+  void Unlock() { pthread_mutex_unlock(&m); }
 
 public:
 

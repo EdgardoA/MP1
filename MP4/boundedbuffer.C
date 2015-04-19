@@ -1,30 +1,30 @@
 #include "boundedbuffer.H"
+#include "item.H"
 
-Boundedbuffer::boundedbuffer(int _size) {
-	lock = new Semaphore(1);
-	full = new Semaphore(0);
-	empty = new Semaphore(_size);	
-	MAX_SIZE = _size;
+Boundedbuffer::Boundedbuffer(int size) {
+	Lock = new Semaphore(1);
+	Full = new Semaphore(0);
+	Empty = new Semaphore(size);	
+	MAX_SIZE = size;
 }
 
-//Boundedbuffer::~boundedbuffer() {}
 
 void Boundedbuffer::depositItem(Item* _item) {
-	empty->P();
-	lock->P();
+	Empty->P();
+	Lock->P();
 	que.push(_item);
-	lock->V();
-	full->V();
+	Lock->V();
+	Full->V();
 }
 
 Item* Boundedbuffer::RetrieveItem() {
 	Item* ret_item;
-	full->P();
-	lock->P();
+	Full->P();
+	Lock->P();
 	ret_item = que.front();
 	que.pop();
-	lock->V();
-	empty->V();
+	Lock->V();
+	Empty->V();
 	
 	return ret_item;
 }
@@ -38,8 +38,8 @@ int Boundedbuffer::size() {
 	return que.size();
 }
 
-Boundedbuffer::void print() {
-    que<Item*> que2 = que;
+void Boundedbuffer::print() {
+    queue<Item*> que2 = que;
     cout << "\tBB: " << endl;
     while(que2.empty() == false) {
         cout << "\t" << que2.front()->id << " " << que2.front()->data << endl;

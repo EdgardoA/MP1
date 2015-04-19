@@ -127,7 +127,6 @@ void RequestChannel::open_read_pipe(char * _pipe_name) {
 /*--------------------------------------------------------------------------*/
 
 RequestChannel::RequestChannel(const string _name, const Side _side) : my_name(_name), my_side(_side) {
-
   if (_side == SERVER_SIDE) {
     open_write_pipe(pipe_name(WRITE_MODE));
     open_read_pipe(pipe_name(READ_MODE));
@@ -135,7 +134,6 @@ RequestChannel::RequestChannel(const string _name, const Side _side) : my_name(_
     open_read_pipe(pipe_name(READ_MODE));
     open_write_pipe(pipe_name(WRITE_MODE));
   }
-
 }
 
 RequestChannel::~RequestChannel() {

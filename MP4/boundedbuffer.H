@@ -3,6 +3,8 @@
 
 #include <queue>
 #include "semaphore.H"
+#include "item.H"
+#include <iostream>
 
 using namespace std;
 
@@ -15,14 +17,14 @@ private:
 	queue<Item*> que;
 
 public:
-    Boundedbuffer(int _size);
+    
+    Boundedbuffer(int size);
     Boundedbuffer() {}
     
     void depositItem(Item* _item);
 	Item* RetrieveItem();
 	bool empty();
 	int size();
-    
     
     ~Boundedbuffer() {}
     
