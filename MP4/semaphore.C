@@ -18,21 +18,21 @@ Semaphore::~Semaphore()
 }
 
 int Semaphore::P() {
-	Lock();
+	lock();
 	while (value <= 0) {
 		pthread_cond_wait(&c, &m);
 	}
-	value --;
-	Unlock();
+	--value;
+	unlock();
 	
 	return 0;
 }
 
 int Semaphore::V() {
-	Lock();
-	value ++;
+	lock();
+	++value;
 	pthread_cond_broadcast(&c);
-	Unlock();
+	unlock();
 	
 	return 0;
 }

@@ -48,15 +48,19 @@ private:
   pthread_mutex_t m;
   pthread_cond_t  c;
   
-  void Lock() { pthread_mutex_lock(&m); }
-  void Unlock() { pthread_mutex_unlock(&m); }
+  void lock() { 
+    pthread_mutex_lock(&m); 
+  }
+  
+  void unlock() { 
+    pthread_mutex_unlock(&m); 
+  }
 
 public:
 
   /* -- CONSTRUCTOR/DESTRUCTOR */
 
   Semaphore(int _val);
-
   ~Semaphore();
 
   /* -- SEMAPHORE OPERATIONS */

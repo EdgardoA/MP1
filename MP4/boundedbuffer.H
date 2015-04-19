@@ -10,10 +10,11 @@ using namespace std;
 
 class Boundedbuffer {
 private:
+    Semaphore* Full;
+	Semaphore* Empty;
     Semaphore* Lock;
-	Semaphore* Full;
-	Semaphore* Empty;	
 	int MAX_SIZE;
+    
 	queue<Item*> que;
 
 public:
@@ -21,10 +22,11 @@ public:
     Boundedbuffer(int size);
     Boundedbuffer() {}
     
-    void depositItem(Item* _item);
-	Item* RetrieveItem();
-	bool empty();
+    bool empty();
 	int size();
+    
+    void putItem(Item* _item);
+	Item* getItem();
     
     ~Boundedbuffer() {}
     

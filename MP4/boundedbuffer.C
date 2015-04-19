@@ -9,28 +9,9 @@ Boundedbuffer::Boundedbuffer(int size) {
 }
 
 
-void Boundedbuffer::depositItem(Item* _item) {
-	Empty->P();
-	Lock->P();
-	que.push(_item);
-	Lock->V();
-	Full->V();
-}
-
-Item* Boundedbuffer::RetrieveItem() {
-	Item* ret_item;
-	Full->P();
-	Lock->P();
-	ret_item = que.front();
-	que.pop();
-	Lock->V();
-	Empty->V();
-	
-	return ret_item;
-}
-
 bool Boundedbuffer::empty() {
 	if (que.size() == 0) return true;
+    
 	return false;
 }
 
@@ -38,11 +19,33 @@ int Boundedbuffer::size() {
 	return que.size();
 }
 
+Item* Boundedbuffer::getItem() {
+	Item* new_item;
+	Full->P();
+	Lock->P();
+	new_item = que.front();
+	que.pop();
+	Lock->V();
+	Empty->V();
+	return new_item;
+}
+
+void Boundedbuffer::putItem(Item* _item) {
+	Empty->P();
+	Lock->P();
+	que.push(_item);
+    
+	Lock->V();
+	Full->V();
+}
+
 void Boundedbuffer::print() {
     queue<Item*> que2 = que;
-    cout << "\tBB: " << endl;
+    cout << "Bounded Buffer: ";
+    
     while(que2.empty() == false) {
-        cout << "\t" << que2.front()->id << " " << que2.front()->data << endl;
+        cout << que2.front()->Id;
+        cout << " " << que2.front()->info << "\n";
         que2.pop();
     }
 }
