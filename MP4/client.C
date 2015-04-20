@@ -61,11 +61,9 @@ int * reader;
 int * writer;
 int * ids;
 
-const int NUM_PERSONS = 3;
-const string PERSONS[NUM_PERSONS] = { "Joe Smith", "Jane Smith", "John Doe" };
-const int STATISTICS_SIZE = 100;
+const string users[3] = { "Joe Smith", "Jane Smith", "John Doe" };
 
-long stats[NUM_PERSONS][STATISTICS_SIZE] = {0}; // initialize to zero
+long stats[3][100]; 
 
 // Other Functions ---------------------------------------------------------*/
 
@@ -81,23 +79,15 @@ void write_initial_items() {
   }
 }
 
-void printHorizontal(int l) {
-  for (int j = 0; j < l; j ++) cout << "-";
-  cout << endl;
-}
-
 void printStatistics() {
   cout << endl << endl;
   
-  for (int i = 0; i < NUM_PERSONS; i ++) {
+  for (int i = 0; i < 3; i ++) {
     int seg_total = 0;
     
-    string header = "Statistics for " + PERSONS[i];
-    printHorizontal(header.length());
-    cout << header << endl;
-    printHorizontal(header.length());
+    cout << "Statistics for " << users[i] << '\n' << endl;
     
-    for (int j = 0; j <= STATISTICS_SIZE; j ++) {
+    for (int j = 0; j <= 100; j ++) {
       if (j % 10 == 0 && j != 0) {
         cout << j - 10 << " - " << j - 1 << "\t\t" << seg_total << " times\t" << endl;
         
@@ -107,14 +97,11 @@ void printStatistics() {
           seg_total += stats[i][j];
       }
     }
-    printHorizontal(header.length());
-    cout << "Total requests: " << n_requests << endl;
-    printHorizontal(header.length());
-    cout << endl;
+
+    cout << "Total requests: " << n_requests << '\n' << endl;
+
   }     
 }
-
-
 
 
 // Thread Functions ---------------------------------------------------------*/
@@ -126,10 +113,8 @@ void* reqThreadRoutine(void* _person) {
   for (int i = 0; i < n_requests; i ++) {
     Item* item = new Item;
     item->Id = person;
-    item->info = "Info " + PERSONS[person];
-    //cout << endl << "\t* * Request thread is depositing " << PERSONS[person] << "'s item in bb" << endl;
-    //cout << "\t* * i = " << i << endl;
-    
+    item->info = "Info " + users[person];
+ 
     reqBuffer.putItem(item);
   }
   
@@ -138,23 +123,23 @@ void* reqThreadRoutine(void* _person) {
 }
 
 void* workerThreadRoutine(void* _nothing) {
-  write_initial_items(); // write the initial items
+  write_initial_items();
   
   bool done = false;
   
   while(!done) {
     fd_set read_set;
     
-    // zero em out
+    // clears
     FD_ZERO(&read_set);
     
-    // set initially
+    // initials
     for (int i = 0; i < w_threads; i++) {
       FD_SET(reader[i], &read_set);
     }
     
     int ready = select(w_threads, &read_set, NULL, NULL, NULL);
-    
+
     if (ready == -1) {
       cout << "Error calling select.";
       exit(1);
@@ -162,15 +147,15 @@ void* workerThreadRoutine(void* _nothing) {
     
     else {
       for (int i = 0; i < w_threads; i ++) {
-        // if isset
+        
         if(FD_ISSET(reader[i], &read_set)) {
           Item * item_r;
-          read(reader[i], READ_BUFFER, MESSAGE_SIZE); // read the response
+          read(reader[i], READ_BUFFER, MESSAGE_SIZE); 
           
           string reply = READ_BUFFER;
           item_r = new Item(ids[i], reply, 0);
           
-          resBuffer.putItem(item_r); // deposit that item in the statistics buffer
+          resBuffer.putItem(item_r); 
           
           if (!reqBuffer.empty()) {
             Item * item_w;
@@ -178,10 +163,10 @@ void* workerThreadRoutine(void* _nothing) {
             item_w = reqBuffer.getItem();
             ids[i] = item_w->Id;
             string data = item_w->info;
-            
-            write(writer[i], data.c_str(), strlen(data.c_str())+1); // send the next item to the server now a spots opened up
+
+            write(writer[i], data.c_str(), strlen(data.c_str())+1);
           } else {
-            usleep(10000); // make sure we're finished
+            usleep(10000);
             done = true;
           }
         }
@@ -200,14 +185,14 @@ void* statRoutine(void* nothing) {
       Item* sta_item = resBuffer.getItem();
       
       int id = sta_item->Id;
+
       int value = atoi(sta_item->info.c_str());
-      if (value < STATISTICS_SIZE - 1) {
+      if (value < 100 - 1) {
         stats[id][value] += 1;
       } else {
-        // max statistics exceeded
       }
     
-      delete sta_item; // finally clean up this item
+      delete sta_item;
     }
   }
   
@@ -239,7 +224,6 @@ int main(int argc, char * argv[]) {
       }
     } 
 
-
   cout << "CLIENT STARTED:" << endl;
 
   cout<<"\nData Requests per Person: " << n_requests << "\nSize of Buffer: " << b_size << "\nWorker Threads: " << w_threads ;
@@ -247,7 +231,6 @@ int main(int argc, char * argv[]) {
   cout << "\nCreating Data Server Process" << endl;
   pid_t child_pid = fork();
 
-    // set arrays
   reader =  new int[w_threads];
   writer =  new int[w_threads];
   ids =   new int[w_threads];
@@ -306,6 +289,8 @@ int main(int argc, char * argv[]) {
     pthread_join(workerThread, NULL);
     
     printStatistics();
+
+    resBuffer.print();
 
     cout << "Closing..." << endl;
     REPLY = chan.send_request("quit");
