@@ -74,7 +74,6 @@ void write_initial_items() {
     
     string data = item->info;
     ids[i] = item->Id;
-    cout<< "Data: " << data << " ID: " << ids[i] << endl;
     
     write(writer[i], data.c_str(), strlen(data.c_str())+1);
   }
@@ -290,6 +289,8 @@ int main(int argc, char * argv[]) {
     pthread_join(workerThread, NULL);
     
     printStatistics();
+
+    resBuffer.print();
 
     cout << "Closing..." << endl;
     REPLY = chan.send_request("quit");
