@@ -3,33 +3,28 @@
 
 #include <queue>
 #include "semaphore.H"
-#include "item.H"
-#include <iostream>
+#include "Item.H"
 
-using namespace std;
-
-class Boundedbuffer {
+class BoundedBuffer {
 private:
-    Semaphore* Full;
-	Semaphore* Empty;
-    Semaphore* Lock;
-	int MAX_SIZE;
-    
-	queue<Item*> que;
-
+  Semaphore* lock;
+  Semaphore* full;
+  Semaphore* empty; 
+  int MAX_SIZE;
+  queue<Item*> list;
+  
 public:
-    
-    Boundedbuffer(int size);
-    Boundedbuffer() {}
-    
-    bool empty();
-	int size();
-    
-    void putItem(Item* _item);
-	Item* getItem();
-    
-    ~Boundedbuffer() {}
-
+  
+  BoundedBuffer() { }
+  BoundedBuffer(int _size);
+  
+  void depositItem(Item* _item);
+  Item* RetrieveItem();
+  bool isEmpty();
+  int size();
+  
+  ~BoundedBuffer() { }
+  
 };
 
 #endif

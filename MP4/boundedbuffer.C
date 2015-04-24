@@ -1,40 +1,39 @@
-#include "boundedbuffer.H"
-#include "item.H"
+#include "BoundedBuffer.H"
 
-Boundedbuffer::Boundedbuffer(int size) {
-	Lock = new Semaphore(1);
-	Full = new Semaphore(0);
-	Empty = new Semaphore(size);	
-	MAX_SIZE = size;
+BoundedBuffer::BoundedBuffer(int _size) {
+	lock = new Semaphore(1);
+	full = new Semaphore(0);
+	empty = new Semaphore(_size);	
+	MAX_SIZE = _size;
 }
 
+void BoundedBuffer::depositItem(Item* _item) {
+	empty->P();
+	lock->P();
+	list.push(_item);
+	lock->V();
+	full->V();
+}
 
-bool Boundedbuffer::empty() {
-	if (que.size() == 0) return true;
-    
+Item* BoundedBuffer::RetrieveItem() {
+	Item* ret_item;
+	full->P();
+	lock->P();
+	ret_item = list.front();
+	list.pop();
+	lock->V();
+	empty->V();
+	
+	return ret_item;
+}
+
+bool BoundedBuffer::isEmpty() {
+	if (list.size() == 0) return true;
 	return false;
 }
 
-int Boundedbuffer::size() {
-	return que.size();
+int BoundedBuffer::size() {
+	return list.size();
 }
 
-Item* Boundedbuffer::getItem() {
-	Item* new_item;
-	Full->P();
-	Lock->P();
-	new_item = que.front();
-	que.pop();
-	Lock->V();
-	Empty->V();
-	return new_item;
-}
 
-void Boundedbuffer::putItem(Item* _item) {
-	Empty->P();
-	Lock->P();
-	que.push(_item);
-    
-	Lock->V();
-	Full->V();
-}
