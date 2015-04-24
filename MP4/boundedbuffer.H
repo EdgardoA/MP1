@@ -3,7 +3,7 @@
 
 #include <queue>
 #include "semaphore.H"
-#include "Item.H"
+#include "item.H"
 
 class BoundedBuffer {
 private:

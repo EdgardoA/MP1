@@ -13,22 +13,23 @@
 /* DEFINES */
 /*--------------------------------------------------------------------------*/
 
-    /* -- (none) -- */ 
+    /* -- (none) -- */
 
 /*--------------------------------------------------------------------------*/
 /* INCLUDES */
 /*--------------------------------------------------------------------------*/
 
 #include <cassert>
-#include <string>
+#include <cstring>
 #include <sstream>
 #include <iostream>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include <pthread.h>
 #include <errno.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 #include "reqchannel.H"
 
@@ -151,9 +152,9 @@ void handle_process_loop(RequestChannel & _channel) {
 
   for(;;) {
 
-	//cout << "Reading next request from channel (" << _channel.name() << ") ..." << flush;
+    //cout << "Reading next request from channel (" << _channel.name() << ") ..." << flush;
     string request = _channel.cread();
-	//cout << " done (" << _channel.name() << ")." << endl;
+    //cout << " done (" << _channel.name() << ")." << endl;
     //cout << "New request is " << request << endl;
 
     if (request.compare("quit") == 0) {

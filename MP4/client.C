@@ -8,10 +8,13 @@ MP4 Final - Daniel Frazee & Edgardo Angel
 /* INCLUDES -------------------------------------------------------------*/
 
 #include <cassert>
-#include <string>
+#include <cstring>
 #include <iostream>
 #include <queue>
 #include <cmath>
+#include <stdio.h>
+#include <stdlib.h>
+
 
 #include <unistd.h> 
 #include <sys/types.h>
@@ -24,7 +27,7 @@ MP4 Final - Daniel Frazee & Edgardo Angel
 #include "reqchannel.H"
 #include "semaphore.H"
 #include "BoundedBuffer.H"
-#include "Item.H"
+#include "item.H"
 
 using namespace std;
 

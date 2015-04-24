@@ -8,17 +8,17 @@ reqchannel.o: reqchannel.H reqchannel.C
 semaphore.o: semaphore.H semaphore.C
 	g++ -c -g semaphore.C -o semaphore.o
 	
-item.o: item.H item.C
-	g++ -c -g item.C -o item.o
+item.o: item.H Item.C
+	g++ -c -g Item.C -o item.o
 	
-boundedbuffer.o: boundedbuffer.H boundedbuffer.C semaphore.H item.H
-	g++ -c -g boundedbuffer.C -o boundedbuffer.o
+BoundedBuffer.o: BoundedBuffer.H BoundedBuffer.C semaphore.H item.H
+	g++ -c -g BoundedBuffer.C -o BoundedBuffer.o
 
 dataserver: dataserver.C reqchannel.o 
 	g++ -g dataserver.C reqchannel.o -o dataserver.o -lpthread
 	
-client: client.C reqchannel.o semaphore.o boundedbuffer.o item.o
-	g++ -g client.C semaphore.o reqchannel.o boundedbuffer.o item.o -o client -lpthread
+client: client.C reqchannel.o semaphore.o BoundedBuffer.o item.o
+	g++ -g client.C semaphore.o reqchannel.o BoundedBuffer.o item.o -o client -lpthread
 	
 clean:
 	rm -f *.o core
