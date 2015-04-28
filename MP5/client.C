@@ -1,6 +1,6 @@
 /* 
 
-MP4 Final - Daniel Frazee & Edgardo Angel
+MP5 - Daniel Frazee & Edgardo Angel
 
 */
 
@@ -24,7 +24,7 @@ MP4 Final - Daniel Frazee & Edgardo Angel
 
 #include <errno.h>
 
-#include "reqchannel.H"
+#include "NetworkRequestChannel.H"
 #include "semaphore.H"
 #include "BoundedBuffer.H"
 #include "item.H"
@@ -66,6 +66,11 @@ int * writer =	new int[50];
 int * ids =	new int[50];
 
 long stats[3][100] = {0};
+
+NetworkRequestChannel* CHAN_CONTROL;
+string HOST;
+vector<NetworkRequestChannel*> channels;
+
 
 
 /* FUNCTIONS --------------------------------------------------------------*/
