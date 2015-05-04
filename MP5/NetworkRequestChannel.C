@@ -9,6 +9,7 @@ C File
 #include <string>
 #include <iostream>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -17,6 +18,7 @@ C File
 #include <arpa/inet.h>
 #include <errno.h>
 #include <sstream>
+#include <stdlib.h>
 
 #include "NetworkRequestChannel.H"
 
@@ -193,10 +195,6 @@ int NetworkRequestChannel::cwrite(string _msg) {
 	
 }
 
-/*--------------------------------------------------------------------------*/
-/* helper  */
-/*--------------------------------------------------------------------------*/
-
-int NetworkRequestChannel::get_fd() { return fd; }
-
-
+int NetworkRequestChannel::get_fd() {
+	return fd; 
+}

@@ -58,7 +58,6 @@ pthread_t joeStat;
 pthread_t janeStat;
 pthread_t johnStat;
 
-
 char readBuffer[200];
 
 int * reader =	new int[50];
@@ -69,7 +68,9 @@ long stats[3][100] = {0};
 
 NetworkRequestChannel* CHAN_CONTROL;
 string HOST;
+int PORT;
 vector<NetworkRequestChannel*> channels;
+//int * ids;
 
 
 
@@ -128,22 +129,35 @@ void* workerThreadRoutine(void* _nothing) {
 	startWorkerChannels();
 	
 	bool done = false;
+	int maxfd = 0;
 	
 	while(!done) {
 		fd_set read_set;
 		
-		FD_ZERO(&read_set);
+		//FD_ZERO(&read_set);
 		
 		for (int i = 0; i < w_threads; i++) {
-			FD_SET(reader[i], &read_set);
+			FD_SET(channels[i]->get_fd(), &read_set);
+		}
+
+		for(int i = 0; i < w_threads; i++)
+		{
+			if (channels[i]->get_fd() > maxfd) maxfd = channels[i]->get_fd();
 		}
 		
+		//int ready = select(maxfd + 1, &read_set, NULL, NULL, NULL);
+
+
+
+		
 		for (int i = 0; i < w_threads; i ++) {
-			if(FD_ISSET(reader[i], &read_set)) {
+			if(FD_ISSET(channels[i]->get_fd(), &read_set)) {
 				Item * item_r;
-				read(reader[i], readBuffer, 200);
+
+				string reply = channels[i]->cread();
+				//read(reader[i], readBuffer, 200);
 				
-				string reply = readBuffer;
+				//string reply = readBuffer;
 				
 				item_r = new Item(ids[i], reply, 0);
 				
@@ -156,13 +170,20 @@ void* workerThreadRoutine(void* _nothing) {
 					ids[i] = item_w->id;
 					string data = item_w->data;
 					
-					write(writer[i], data.c_str(), strlen(data.c_str())+1); 
+					channels[i]->cwrite(data.c_str());
+					//write(writer[i], data.c_str(), strlen(data.c_str())+1); 
 				} else {
 					usleep(10000);
 					done = true;
 				}
 			}
 		}
+
+			// close the channels
+	for (int i = 0; i < w_threads; i ++) {
+		channels[i]->cwrite("quit");
+		usleep(1000);
+	}
 		
 		
 		
@@ -196,8 +217,12 @@ void* statRoutine(void* nothing) {
 int main(int argc, char * argv[]) {
 	
 	int c, n, b, w;
+	string hostStr;
+
+	HOST = "localhost";
+	PORT = 13253;
    
-   	while((c = getopt(argc, argv, "n:b:w:")) != -1) {
+   	while((c = getopt(argc, argv, "n:b:w:h:p:")) != -1) {
     	switch(c) {
 			case 'n':
 				n_requests = atoi(optarg);
@@ -207,6 +232,13 @@ int main(int argc, char * argv[]) {
 				break;
 			case 'w':
 				w_threads = atoi(optarg);
+				break;
+			case 'h':
+				hostStr = optarg;
+				HOST = hostStr;
+				break;
+			case 'p':
+				PORT = atoi(optarg);
 				break;
 			case '?':
 				break;
@@ -219,7 +251,9 @@ int main(int argc, char * argv[]) {
 	cout << "---Number of data requests per person: " << n_requests << '\n' << endl ;
 	cout <<	"---Size of bounded buffer in requests: " << b_size <<  '\n' << endl;
 	cout << "---Number of worker threads: " << w_threads <<  '\n' << endl;
-	
+	cout << "---Server: " << HOST <<  '\n' << endl;
+	cout << "---Port: " << PORT <<  '\n' << endl;
+
 	cout << "Creating Data Server..." << endl;
 	pid_t child_pid = fork();
 	
@@ -236,13 +270,12 @@ int main(int argc, char * argv[]) {
 		cout << "Creating Response Buffer...\n" << endl;
 		resBuffer = BoundedBuffer(b_size);
 		 
+		/* OLD
 		cout << "Connection with Dataserver...\n" << endl;
-		
 		RequestChannel chan("control", RequestChannel::CLIENT_SIDE);
     	string REPLY =  chan.send_request("hello");
-
-
 		cout << "\n***Server Reply: " << REPLY << "***\n" <<endl;
+		*/
 
 		cout << "Creating Request Threads...\n" << endl;
 		
@@ -252,11 +285,14 @@ int main(int argc, char * argv[]) {
 		
 		cout << "Creating Request Channels...\n" << endl;
 		for (int i = 0; i < w_threads; i ++) {
-			string channel_name = chan.send_request("newthread");
-      		RequestChannel * channel = new RequestChannel(channel_name, RequestChannel::CLIENT_SIDE);
+			//string channel_name = chan.send_request("newthread");
+			NetworkRequestChannel * channel = new NetworkRequestChannel(HOST,PORT);
+      		//RequestChannel * channel = new RequestChannel(channel_name, RequestChannel::CLIENT_SIDE);
 			
-			reader[i] = channel->read_fd();
-			writer[i] = channel->write_fd();
+			channels.push_back(channel);
+
+			//reader[i] = channel->read_fd();
+			//writer[i] = channel->write_fd();
 		}
 				
 		cout << "Creating Worker Threads...\n" << endl;
@@ -273,9 +309,11 @@ int main(int argc, char * argv[]) {
 		
 		printStats();
 		
+		/*
 		cout << "Closing...\n" << endl;
 		REPLY = chan.send_request("quit");
 		cout << "***Server Response: " << REPLY << "***\n" << endl;
+		*/
 		
 		usleep(1000000);
 	}

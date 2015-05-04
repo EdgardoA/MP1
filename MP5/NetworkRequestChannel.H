@@ -11,7 +11,7 @@ H File
 
 #include <iostream>
 #include <fstream>
-#include <string>
+#include <string.h>
 #include "semaphore.H"
 
 using namespace std;

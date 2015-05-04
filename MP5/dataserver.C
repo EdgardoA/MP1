@@ -32,7 +32,7 @@
 #include <stdlib.h>
 
 #include "NetworkRequestChannel.H"
-#include "reqchannel.H"
+#include "semaphore.H"
 
 using namespace std;
 
@@ -58,7 +58,7 @@ static int nthreads = 0;
 /* FORWARDS */
 /*--------------------------------------------------------------------------*/
 
-void handle_process_loop(RequestChannel & _channel);
+void handle_process_loop(int fd);
 
 /*--------------------------------------------------------------------------*/
 /* LOCAL FUNCTIONS -- SUPPORT FUNCTIONS */
