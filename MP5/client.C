@@ -105,7 +105,7 @@ void startWorkerChannels() {
 		string data = item->data;
 		ids[i] = item->id;
 		
-		write(writer[i], data.c_str(), strlen(data.c_str())+1);
+		channels[i]->cwrite(data.c_str());
 	}
 }
 
@@ -146,9 +146,6 @@ void* workerThreadRoutine(void* _nothing) {
 		}
 		
 		//int ready = select(maxfd + 1, &read_set, NULL, NULL, NULL);
-
-
-
 		
 		for (int i = 0; i < w_threads; i ++) {
 			if(FD_ISSET(channels[i]->get_fd(), &read_set)) {
@@ -220,7 +217,7 @@ int main(int argc, char * argv[]) {
 	string hostStr;
 
 	HOST = "localhost";
-	PORT = 13253;
+	PORT = 12357;
    
    	while((c = getopt(argc, argv, "n:b:w:h:p:")) != -1) {
     	switch(c) {
@@ -314,7 +311,7 @@ int main(int argc, char * argv[]) {
 		REPLY = chan.send_request("quit");
 		cout << "***Server Response: " << REPLY << "***\n" << endl;
 		*/
-		
+
 		usleep(1000000);
 	}
 }
