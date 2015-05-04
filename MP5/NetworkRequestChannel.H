@@ -31,7 +31,7 @@ public:
  
   ~NetworkRequestChannel();  /* Destructor of the local copy of the channel. */
 
-  string send_request(string _request); /* Send a string over the channel and wait for a reply. */
+  //string send_request(string _request); /* Send a string over the channel and wait for a reply. */
   
   string cread(); /* Blocking read of data from the channel. Returns a string of characters read from the channel. Returns NULL if read failed. */
   

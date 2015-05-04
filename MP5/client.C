@@ -62,7 +62,7 @@ char readBuffer[200];
 
 int * reader =	new int[50];
 int * writer =	new int[50];
-int * ids =	new int[50];
+int * ids =	new int[155];
 
 long stats[3][100] = {0};
 
@@ -145,46 +145,52 @@ void* workerThreadRoutine(void* _nothing) {
 			if (channels[i]->get_fd() > maxfd) maxfd = channels[i]->get_fd();
 		}
 		
-		//int ready = select(maxfd + 1, &read_set, NULL, NULL, NULL);
+		int ready = select(maxfd + 1, &read_set, NULL, NULL, NULL);
+
+		if (ready == -1) {
+			cout << "Error calling select.";
+			exit(1);
+		}
 		
-		for (int i = 0; i < w_threads; i ++) {
-			if(FD_ISSET(channels[i]->get_fd(), &read_set)) {
-				Item * item_r;
+		else {
+		
+			for (int i = 0; i < w_threads; i ++) {
+				if(FD_ISSET(channels[i]->get_fd(), &read_set)) {
+					Item * item_r;
 
-				string reply = channels[i]->cread();
-				//read(reader[i], readBuffer, 200);
-				
-				//string reply = readBuffer;
-				
-				item_r = new Item(ids[i], reply, 0);
-				
-				resBuffer.depositItem(item_r);
+					string reply = channels[i]->cread();
+					//read(reader[i], readBuffer, 200);
+					
+					//string reply = readBuffer;
+					
+					item_r = new Item(ids[i], reply, 0);
+					
+					resBuffer.depositItem(item_r);
 
-				if (!reqBuffer.isEmpty()) {
-					Item * item_w;
-					
-					item_w = reqBuffer.RetrieveItem();
-					ids[i] = item_w->id;
-					string data = item_w->data;
-					
-					channels[i]->cwrite(data.c_str());
-					//write(writer[i], data.c_str(), strlen(data.c_str())+1); 
-				} else {
-					usleep(10000);
-					done = true;
+					if (!reqBuffer.isEmpty()) {
+						Item * item_w;
+						
+						item_w = reqBuffer.RetrieveItem();
+						ids[i] = item_w->id;
+						string data = item_w->data;
+						
+						channels[i]->cwrite(data.c_str());
+						//write(writer[i], data.c_str(), strlen(data.c_str())+1); 
+					} else {
+						usleep(10000);
+						done = true;
+					}
 				}
 			}
 		}
 
+	}
 			// close the channels
 	for (int i = 0; i < w_threads; i ++) {
 		channels[i]->cwrite("quit");
 		usleep(1000);
 	}
 		
-		
-		
-	}
 	
 	pthread_exit(NULL);
 }
