@@ -1,8 +1,6 @@
 /*
-
 Network Request Channel by Daniel Frazee & Edgardo Angel
 C File
-
 */
 
 #include <cassert>
@@ -24,42 +22,40 @@ C File
 
 using namespace std;
 
-struct sockaddr_in serverIn;
-
-const int MAX_MESSAGE = 255;
+struct sockaddr_in serverInput;
 
 // CLIENT CONNECTION
 
 int createClientConnection(const char * host, const char * port) {
-	struct sockaddr_in sockIn;
-	memset(&sockIn, 0, sizeof(sockIn));
-	sockIn.sin_family = AF_INET;
+	struct sockaddr_in socketInput;
+	memset(&socketInput, 0, sizeof(socketInput));
+	socketInput.sin_family = AF_INET;
 	
 	// establish port
 	if (struct servent * pse = getservbyname(port, "tcp")) {
-		sockIn.sin_port = pse->s_port;
-	} else if ((sockIn.sin_port = htons((unsigned short)atoi(port))) == 0) { 
+		socketInput.sin_port = pse->s_port;
+	} else if ((socketInput.sin_port = htons((unsigned short)atoi(port))) == 0) { 
 		cout << "Cannot connect to port " << atoi(port);
 		exit(-1);
 	}
 	
 	// try to reach the host
 	if (struct hostent * hn = gethostbyname(host)) {
-		memcpy(&sockIn.sin_addr, hn->h_addr, hn->h_length);
-	} else if((sockIn.sin_addr.s_addr = inet_addr(host)) == INADDR_NONE) {
+		memcpy(&socketInput.sin_addr, hn->h_addr, hn->h_length);
+	} else if((socketInput.sin_addr.s_addr = inet_addr(host)) == INADDR_NONE) {
 		cout << "Cannot resolve host <" << host << ">";
 		exit(-1);
 	}
 	
 	// establish a socket
-	int s = socket(AF_INET, SOCK_STREAM, 0); //SOCK_STREAM finds a socket for a TCP connection
+	int s = socket(AF_INET, SOCK_STREAM, 0);
 	if (s < 0) {
 		cout << "Cannot establish socket";
 		exit(-1);
 	}
 	
 	// make the connection
-	if (connect(s, (struct sockaddr *)&sockIn, sizeof(sockIn)) < 0) {
+	if (connect(s, (struct sockaddr *)&socketInput, sizeof(socketInput)) < 0) {
 		cout << "Cannot connect to " << host << "::" << port;
 		exit(-1);
 	}
@@ -71,20 +67,19 @@ int createClientConnection(const char * host, const char * port) {
 
 int createServerConnection(const char * svc, int backlog) {
 
-	memset(&serverIn, 0, sizeof(serverIn));
-	serverIn.sin_family = AF_INET;
-	serverIn.sin_addr.s_addr = INADDR_ANY;
+	memset(&serverInput, 0, sizeof(serverInput));
+	serverInput.sin_family = AF_INET;
+	serverInput.sin_addr.s_addr = INADDR_ANY;
 	
-	// map to the provided port
+	// Mapping
 	if (struct servent * pse = getservbyname(svc, "tcp")) {
-		serverIn.sin_port = pse->s_port;
-	} else if ((serverIn.sin_port = htons((unsigned short)atoi(svc))) == 0) {
+		serverInput.sin_port = pse->s_port;
+	} else if ((serverInput.sin_port = htons((unsigned short)atoi(svc))) == 0) {
 		cout << "Cannot get service entry";
 		exit(-1);
 	}
-	
-	
-	// bind to the port
+
+	// Binding
 	int snum  = socket(AF_INET, SOCK_STREAM, 0);
 	
 	if (snum < 0) {
@@ -92,12 +87,12 @@ int createServerConnection(const char * svc, int backlog) {
 		exit(-1);
 	}
 	
-	if (bind(snum, (struct sockaddr *)&serverIn, sizeof(serverIn)) < 0) {
+	if (bind(snum, (struct sockaddr *)&serverInput, sizeof(serverInput)) < 0) {
 		cout << "Cannot bind";
 		exit(-1);
 	}
 	
-	// begin listening for traffic
+	// Listening
 	if (listen(snum, backlog) < 0) {
 		cout << "Error trying to begin listening";
 		exit(-1);
@@ -106,9 +101,7 @@ int createServerConnection(const char * svc, int backlog) {
 	return snum;
 }
 
-
 // CONSTRUCTOR CLIENT
-
 NetworkRequestChannel::NetworkRequestChannel(const string _server_host_name, const unsigned short _port) {
 	stringstream ss;
 	ss << _port;
@@ -119,28 +112,25 @@ NetworkRequestChannel::NetworkRequestChannel(const string _server_host_name, con
 }
 
 // CONSTRUCTOR SERVER
-
 NetworkRequestChannel::NetworkRequestChannel(const unsigned short _port, void * (*connection_handler) (void *), int backlog) {
 	stringstream ss;
 	ss << _port;
 	string port = ss.str();
 	
 	int master_sock = createServerConnection(port.c_str(), backlog);
-	int serverSize = sizeof(serverIn);
+	int serverSize = sizeof(serverInput);
 	
-
 	while (true) {
-		int * slave_sock = new int;
+		int * tempSocket = new int;
 		
 		pthread_t thread;
 		pthread_attr_t attr; 
 		pthread_attr_init(&attr);
 			
+		*tempSocket = accept(master_sock,(struct sockaddr*)&serverInput, (socklen_t*)&serverSize);
 		
-		*slave_sock = accept(master_sock,(struct sockaddr*)&serverIn, (socklen_t*)&serverSize);
-		
-		if (slave_sock < 0) {
-			delete slave_sock;
+		if (tempSocket < 0) {
+			delete tempSocket;
 			
 			if (errno == EINTR) continue;
 			else {
@@ -149,39 +139,34 @@ NetworkRequestChannel::NetworkRequestChannel(const unsigned short _port, void * 
 			}
 		}	
 		
-		pthread_create(&thread, &attr, connection_handler, (void*)slave_sock);
+		pthread_create(&thread, &attr, connection_handler, (void*)tempSocket);
 		
- 
 	}
 	cout << "Connection established";
 }
 
 // DESTRUCTOR
 NetworkRequestChannel::~NetworkRequestChannel() {
-	close(fd); 
+	close(fd);
 }
 
 // READ
-
 string NetworkRequestChannel::cread() {
-	char buf[MAX_MESSAGE];
+	char buf[255];
 	
-	if (read(fd, buf, MAX_MESSAGE) < 0) {
+	if (read(fd, buf, 255) < 0) {
 		perror("Can't read");
 		exit(-1);
 	}
 	
-	
 	string s = buf;
-
 	return s;
 }
 
 // WRITE
-
 int NetworkRequestChannel::cwrite(string _msg) {
-	if (_msg.length() >= MAX_MESSAGE) {
-		cout << "Message exceeded MAX_MESSAGE";
+	if (_msg.length() >= 255) {
+		cout << "Message exceeded 255";
 		return -1;
 	}
 	
@@ -191,8 +176,6 @@ int NetworkRequestChannel::cwrite(string _msg) {
 		perror("Can't write.");
 		exit(-1);
 	}
-	
-	
 }
 
 int NetworkRequestChannel::get_fd() {

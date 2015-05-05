@@ -1,9 +1,6 @@
 /* 
-
 MP5 - Daniel Frazee & Edgardo Angel
-
 */
-
 
 /* INCLUDES -------------------------------------------------------------*/
 
@@ -66,13 +63,10 @@ int * ids =	new int[155];
 
 long stats[3][100] = {0};
 
-NetworkRequestChannel* CHAN_CONTROL;
+NetworkRequestChannel* nChanControl;
 string HOST;
 int PORT;
 vector<NetworkRequestChannel*> channels;
-//int * ids;
-
-
 
 /* FUNCTIONS --------------------------------------------------------------*/
 
@@ -159,9 +153,6 @@ void* workerThreadRoutine(void* _nothing) {
 					Item * item_r;
 
 					string reply = channels[i]->cread();
-					//read(reader[i], readBuffer, 200);
-					
-					//string reply = readBuffer;
 					
 					item_r = new Item(ids[i], reply, 0);
 					
@@ -175,7 +166,7 @@ void* workerThreadRoutine(void* _nothing) {
 						string data = item_w->data;
 						
 						channels[i]->cwrite(data.c_str());
-						//write(writer[i], data.c_str(), strlen(data.c_str())+1); 
+
 					} else {
 						usleep(10000);
 						done = true;
@@ -185,14 +176,15 @@ void* workerThreadRoutine(void* _nothing) {
 		}
 
 	}
-			// close the channels
+
 	for (int i = 0; i < w_threads; i ++) {
 		channels[i]->cwrite("quit");
 		usleep(1000);
-	}
 		
-	
+	}
+
 	pthread_exit(NULL);
+	
 }
 
 void* statRoutine(void* nothing) {
@@ -222,6 +214,7 @@ int main(int argc, char * argv[]) {
 	int c, n, b, w;
 	string hostStr;
 
+	//for debugging
 	HOST = "localhost";
 	PORT = 12357;
    
@@ -273,13 +266,6 @@ int main(int argc, char * argv[]) {
 		cout << "Creating Response Buffer...\n" << endl;
 		resBuffer = BoundedBuffer(b_size);
 		 
-		/* OLD
-		cout << "Connection with Dataserver...\n" << endl;
-		RequestChannel chan("control", RequestChannel::CLIENT_SIDE);
-    	string REPLY =  chan.send_request("hello");
-		cout << "\n***Server Reply: " << REPLY << "***\n" <<endl;
-		*/
-
 		cout << "Creating Request Threads...\n" << endl;
 		
 		pthread_create(&joeThread, NULL, reqThreadRoutine, joe);
@@ -288,14 +274,8 @@ int main(int argc, char * argv[]) {
 		
 		cout << "Creating Request Channels...\n" << endl;
 		for (int i = 0; i < w_threads; i ++) {
-			//string channel_name = chan.send_request("newthread");
 			NetworkRequestChannel * channel = new NetworkRequestChannel(HOST,PORT);
-      		//RequestChannel * channel = new RequestChannel(channel_name, RequestChannel::CLIENT_SIDE);
-			
 			channels.push_back(channel);
-
-			//reader[i] = channel->read_fd();
-			//writer[i] = channel->write_fd();
 		}
 				
 		cout << "Creating Worker Threads...\n" << endl;
@@ -312,6 +292,9 @@ int main(int argc, char * argv[]) {
 		
 		printStats();
 		
+		cout<<"Closing Everything..." << endl;
+		
+		
 		/*
 		cout << "Closing...\n" << endl;
 		REPLY = chan.send_request("quit");
@@ -320,4 +303,5 @@ int main(int argc, char * argv[]) {
 
 		usleep(1000000);
 	}
+	return 0;
 }
