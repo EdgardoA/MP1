@@ -24,48 +24,46 @@ using namespace std;
 
 struct sockaddr_in serverInput;
 
-// CLIENT CONNECTION
-
-int createClientConnection(const char * host, const char * port) {
+// CLIENT SIDE
+int createClientSide(const char * host, const char * port) {
 	struct sockaddr_in socketInput;
 	memset(&socketInput, 0, sizeof(socketInput));
 	socketInput.sin_family = AF_INET;
 	
-	// establish port
+	// Porting
 	if (struct servent * pse = getservbyname(port, "tcp")) {
 		socketInput.sin_port = pse->s_port;
 	} else if ((socketInput.sin_port = htons((unsigned short)atoi(port))) == 0) { 
-		cout << "Cannot connect to port " << atoi(port);
+		cout << "Can't connect to port " << atoi(port);
 		exit(-1);
 	}
 	
-	// try to reach the host
+	// Host
 	if (struct hostent * hn = gethostbyname(host)) {
 		memcpy(&socketInput.sin_addr, hn->h_addr, hn->h_length);
 	} else if((socketInput.sin_addr.s_addr = inet_addr(host)) == INADDR_NONE) {
-		cout << "Cannot resolve host <" << host << ">";
+		cout << "Can't resolve host <" << host << ">";
 		exit(-1);
 	}
 	
-	// establish a socket
+	// Socket
 	int s = socket(AF_INET, SOCK_STREAM, 0);
 	if (s < 0) {
-		cout << "Cannot establish socket";
+		cout << "Can't establish socket";
 		exit(-1);
 	}
 	
-	// make the connection
+	// Connection
 	if (connect(s, (struct sockaddr *)&socketInput, sizeof(socketInput)) < 0) {
-		cout << "Cannot connect to " << host << "::" << port;
+		cout << "Can't connect to " << host << "::" << port;
 		exit(-1);
 	}
 	
 	return s;
 }
 
-// SERVER CONNECTION
-
-int createServerConnection(const char * svc, int backlog) {
+// SERVER SIDE
+int createServerSide(const char * svc, int backlog) {
 
 	memset(&serverInput, 0, sizeof(serverInput));
 	serverInput.sin_family = AF_INET;
@@ -75,7 +73,7 @@ int createServerConnection(const char * svc, int backlog) {
 	if (struct servent * pse = getservbyname(svc, "tcp")) {
 		serverInput.sin_port = pse->s_port;
 	} else if ((serverInput.sin_port = htons((unsigned short)atoi(svc))) == 0) {
-		cout << "Cannot get service entry";
+		cout << "Can't get service entry";
 		exit(-1);
 	}
 
@@ -83,12 +81,12 @@ int createServerConnection(const char * svc, int backlog) {
 	int snum  = socket(AF_INET, SOCK_STREAM, 0);
 	
 	if (snum < 0) {
-		cout << "Cannot create socket";
+		cout << "Can't create socket";
 		exit(-1);
 	}
 	
 	if (bind(snum, (struct sockaddr *)&serverInput, sizeof(serverInput)) < 0) {
-		cout << "Cannot bind";
+		cout << "Can't bind";
 		exit(-1);
 	}
 	
@@ -107,7 +105,7 @@ NetworkRequestChannel::NetworkRequestChannel(const string _server_host_name, con
 	ss << _port;
 	string port = ss.str();
 	
-	fd = createClientConnection(_server_host_name.c_str(), port.c_str());
+	fd = createClientSide(_server_host_name.c_str(), port.c_str());
 	
 }
 
@@ -117,7 +115,7 @@ NetworkRequestChannel::NetworkRequestChannel(const unsigned short _port, void * 
 	ss << _port;
 	string port = ss.str();
 	
-	int master_sock = createServerConnection(port.c_str(), backlog);
+	int master_sock = createServerSide(port.c_str(), backlog);
 	int serverSize = sizeof(serverInput);
 	
 	while (true) {
